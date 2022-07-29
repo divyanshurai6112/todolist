@@ -1,0 +1,65 @@
+const express = require("express");
+
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+
+const app = express();
+
+mongoose.connect("mongodb://localhoste:27017/todolistDB");
+const itemSchema = mongoose.Schema({
+  name: String
+});
+
+const Item = mongoose.model("Item",itemSchema);
+const Task = mongoose.model("Task",itemSchema);
+
+
+let newItems=[];
+let newWorks=[];
+
+app.set("view engine","ejs");
+app.use(express.urlencoded());
+app.use(express.static("public"));
+
+
+app.get("/to-buy",function(req,res){
+  let today = new Date();
+  let options={
+    weekday:"long",
+    month:"long",
+    //year:"numeric",
+    day:"numeric"
+  };
+  let day = today.toLocaleDateString("en-US",options);
+  res.render("list",{listType:"To-Buy List", properDate:day, newTasks:newItems});
+});
+
+
+app.post("/to-buy",function(req,res){
+  var item = req.body.newItem;
+  newItems.push(item);
+  res.redirect("/to-buy");
+});
+
+app.get("/task-list",function(req,res){
+  let today = new Date();
+  let options={
+    weekday:"long",
+    month:"long",
+    //year:"numeric",
+    day:"numeric"
+  };
+  let day = today.toLocaleDateString("en-US",options);
+  res.render("list",{listType:"Work To Do", properDate:day, newTasks:newWorks});
+})
+
+app.post("/task-list",function(req,res){
+  let task = req.body.newTask;
+  newWorks.push(task);
+  res.redirect("/task-list")
+})
+
+
+app.listen(3000,function(){
+  console.log("server is running on port 3000");
+});
